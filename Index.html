@@ -1,1 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Admin App</title>
+  
+  <!-- Web App Capabilities for iOS/Android Home Screen -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="My Admin">
+  <meta name="theme-color" content="#0f172a">
 
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-dim: #94a3b8;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #10b981;
+      --border: #334155;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      padding-bottom: 90px; /* Space for sticky bottom navigation */
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .nav-tabs {
+      display: flex;
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 600px;
+      background: var(--card-bg);
+      border-top: 1px solid var(--border);
+      z-index: 100;
+    }
+
+    .nav-tab {
+      flex: 1;
+      padding: 14px 0;
+      text-align: center;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .nav-tab.active {
+      color: var(--accent);
+      border-top: 3px solid var(--accent);
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    /* Cards & Containers */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 16px;
+      border: 1px solid var(--border);
+    }
+
+    .card.full-width {
+      grid-column: span 2;
+    }
+
+    .card-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .card-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .card-value.highlight {
+      color: var(--warning);
+    }
+
+    .card-value.alert {
+      color: var(--danger);
+    }
+
+    /* Lists */
+    .section-title {
+      font-size: 1.1rem;
+      margin: 18px 0 10px 0;
+      color: var(--text);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .item-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .item-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .item-details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .item-name {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .item-subtext {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    .item-tag {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: var(--border);
+      color: var(--text);
+      margin-right: 6px;
+      text-transform: capitalize;
+    }
+
+    .item-amount-group {
+      text-align: right;
+    }
+
+    .item-amount {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .item-normalized {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    /* Buttons & Forms */
+    .btn {
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 0.95rem;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      width: auto;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    label {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    input, select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    /* Category Badges */
+    .tag-bill { background: #3b82f6; color: white; }
+    .tag-insurance { background: #8b5cf6; color: white; }
+    .tag-subscription { background: #ec4899; color: white; }
+    .tag-renewal { background: #f59e0b; color: black; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>My Admin App</h1>
+  </header>
+
+  <!-- DASHBOARD VIEW -->
+  <div id="view-dashboard" class="view active">
+    
+    <!-- Total Cost Summary -->
+    <div class="card full-width" style="margin-bottom: 12px; background: #0f2942; border-color: #0284c7;">
+      <div class="card-title">Total Outgoings (Normalized)</div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 8px;">
+        <div>
+          <span style="font-size: 0.8rem; color: var(--text-dim);">Weekly: </span>
+          <span id="summary-weekly" style="font-size: 1.2rem; font-weight: 700; color: var(--accent);">$0.00</span>
+        </div>
+        <div>
+          <span style="font-size: 0.8rem; color: var(--text-dim);">Yearly: </span>
+          <span id="summary-yearly" style="font-size: 1.2rem; font-weight: 700; color: var(--accent);">$0.00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert Cards Grid -->
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Bills Due (7 Days)</div>
+        <div id="dash-bills-due" class="card-value alert">0</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Insurance Due (30 Days)</div>
+        <div id="dash-insurance-due" class="card-value highlight">0</div>
+      </div>
+      <div class="card full-width">
+        <div class="card-title">Other Renewals Due (30 Days)</div>
+        <div id="dash-renewals-due" class="card-value highlight">0</div>
+      </div>
+    </div>
+
+    <!-- Counts Grid -->
+    <div class="section-title">Active Items Count</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Insurance Policies</div>
+        <div id="count-insurance" class="card-value">0</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Subscriptions</div>
+        <div id="count-subscriptions" class="card-value">0</div>
+      </div>
+      <div class="card full-width">
+        <div class="card-title">Other Accounts & Renewals</div>
+        <div id="count-other" class="card-value">0</div>
+      </div>
+    </div>
+
+    <!-- Upcoming List -->
+    <div class="section-title">Action Needed Soon</div>
+    <ul id="dash-upcoming-list" class="item-list"></ul>
+  </div>
+
+  <!-- ALL ITEMS VIEW -->
+  <div id="view-items" class="view">
+    <div class="section-title">
+      All Tracked Items
+      <button class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.8rem;" onclick="switchTab('add')">+ Add New</button>
+    </div>
+    <ul id="all-items-list" class="item-list"></ul>
+  </div>
+
+  <!-- ADD ITEM VIEW -->
+  <div id="view-add" class="view">
+    <div class="section-title">Add New Entry</div>
+    <form id="item-form">
+      <div class="form-group">
+        <label for="name">Title / Name</label>
+        <input type="text" id="name" placeholder="e.g. Car Insurance, Netflix, Electricity" required>
+      </div>
+
+      <div class="form-group">
+        <label for="category">Category</label>
+        <select id="category" required>
+          <option value="bill">Bill / Utility</option>
+          <option value="insurance">Insurance Policy</option>
+          <option value="subscription">Subscription</option>
+          <option value="renewal">Other Renewal / Critical Date</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="amount">Amount ($)</label>
+        <input type="number" id="amount" step="0.01" placeholder="0.00" required>
+      </div>
+
+      <div class="form-group">
+        <label for="frequency">Frequency</label>
+        <select id="frequency" required>
+          <option value="weekly">Weekly</option>
+          <option value="fortnightly">Fortnightly</option>
+          <option value="monthly">Monthly</option>
+          <option value="quarterly">Quarterly</option>
+          <option value="yearly" selected>Yearly</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="dueDate">Next Due / Renewal Date</label>
+        <input type="date" id="dueDate" required>
+      </div>
+
+      <button type="submit" class="btn" style="margin-top: 8px;">Save Entry</button>
+    </form>
+  </div>
+
+  <!-- NAVIGATION TABS -->
+  <nav class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('dashboard')">Dashboard</button>
+    <button class="nav-tab" onclick="switchTab('items')">All Items</button>
+    <button class="nav-tab" onclick="switchTab('add')">+ Add Item</button>
+  </nav>
+
+  <script>
+    // Load stored items or initialize empty array
+    let items = JSON.parse(localStorage.getItem('my_admin_items')) || [];
+
+    // Save items to local storage
+    function saveItems() {
+      localStorage.setItem('my_admin_items', JSON.stringify(items));
+      render();
+    }
+
+    // Switch active view tab
+    function switchTab(tabName) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+      document.getElementById(`view-${tabName}`).classList.add('active');
+      
+      const tabIdx = tabName === 'dashboard' ? 0 : tabName === 'items' ? 1 : 2;
+      document.querySelectorAll('.nav-tab')[tabIdx].classList.add('active');
+    }
+
+    // Normalized cost calculations
+    function calculateNormalizedCosts(amount, frequency) {
+      let yearly = 0;
+      switch (frequency) {
+        case 'weekly': yearly = amount * 52; break;
+        case 'fortnightly': yearly = amount * 26; break;
+        case 'monthly': yearly = amount * 12; break;
+        case 'quarterly': yearly = amount * 4; break;
+        case 'yearly': yearly = amount * 1; break;
+      }
+      const weekly = yearly / 52;
+      return { yearly, weekly };
+    }
+
+    // Date Difference in Days
+    function getDaysUntil(dateString) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const target = new Date(dateString);
+      target.setHours(0, 0, 0, 0);
+      const diffTime = target - today;
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
+
+    // Format currency
+    function fmt(num) {
+      return '$' + Number(num).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    // Delete item
+    function deleteItem(id) {
+      if (confirm('Delete this item?')) {
+        items = items.filter(i => i.id !== id);
+        saveItems();
+      }
+    }
+
+    // Main Render Engine
+    function render() {
+      // 1. Calculate Summary Totals
+      let totalYearly = 0;
+      let totalWeekly = 0;
+
+      items.forEach(item => {
+        const { yearly, weekly } = calculateNormalizedCosts(item.amount, item.frequency);
+        totalYearly += yearly;
+        totalWeekly += weekly;
+      });
+
+      document.getElementById('summary-yearly').innerText = fmt(totalYearly);
+      document.getElementById('summary-weekly').innerText = fmt(totalWeekly);
+
+      // 2. Counts and Dashboard Alerts
+      let billsDue7 = 0;
+      let insuranceDue30 = 0;
+      let renewalsDue30 = 0;
+
+      let insuranceCount = 0;
+      let subscriptionCount = 0;
+      let otherCount = 0;
+
+      const upcomingItems = [];
+
+      items.forEach(item => {
+        const days = getDaysUntil(item.dueDate);
+
+        // Counts
+        if (item.category === 'insurance') insuranceCount++;
+        else if (item.category === 'subscription') subscriptionCount++;
+        else if (item.category === 'renewal' || item.category === 'bill') otherCount++;
+
+        // Alerts
+        if (item.category === 'bill' && days >= 0 && days <= 7) billsDue7++;
+        if (item.category === 'insurance' && days >= 0 && days <= 30) insuranceDue30++;
+        if (item.category === 'renewal' && days >= 0 && days <= 30) renewalsDue30++;
+
+        // Upcoming items list (due within 30 days)
+        if (days >= 0 && days <= 30) {
+          upcomingItems.push({ ...item, days });
+        }
+      });
+
+      // Update Dashboard Counters
+      document.getElementById('dash-bills-due').innerText = billsDue7;
+      document.getElementById('dash-insurance-due').innerText = insuranceDue30;
+      document.getElementById('dash-renewals-due').innerText = renewalsDue30;
+
+      document.getElementById('count-insurance').innerText = insuranceCount;
+      document.getElementById('count-subscriptions').innerText = subscriptionCount;
+      document.getElementById('count-other').innerText = otherCount;
+
+      // Render Dashboard Upcoming List
+      const dashList = document.getElementById('dash-upcoming-list');
+      dashList.innerHTML = '';
+      if (upcomingItems.length === 0) {
+        dashList.innerHTML = '<div class="empty-state">No bills or renewals due in the next 30 days.</div>';
+      } else {
+        upcomingItems.sort((a, b) => a.days - b.days).forEach(item => {
+          dashList.appendChild(createItemCard(item, true));
+        });
+      }
+
+      // Render All Items List
+      const allList = document.getElementById('all-items-list');
+      allList.innerHTML = '';
+      if (items.length === 0) {
+        allList.innerHTML = '<div class="empty-state">No items added yet. Tap "+ Add Item" to get started.</div>';
+      } else {
+        items.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)).forEach(item => {
+          allList.appendChild(createItemCard(item, false));
+        });
+      }
+    }
+
+    // Helper to generate list item DOM
+    function createItemCard(item, isDashboard) {
+      const { yearly, weekly } = calculateNormalizedCosts(item.amount, item.frequency);
+      const days = getDaysUntil(item.dueDate);
+      
+      let dueText = `Due in ${days} day(s)`;
+      if (days === 0) dueText = 'Due Today!';
+      if (days < 0) dueText = `Overdue by ${Math.abs(days)} day(s)`;
+
+      const li = document.createElement('li');
+      li.className = 'item-card';
+
+      const tagClass = `tag-${item.category}`;
+
+      li.innerHTML = `
+        <div class="item-details">
+          <div>
+            <span class="item-tag ${tagClass}">${item.category}</span>
+            <span class="item-name">${escapeHtml(item.name)}</span>
+          </div>
+          <div class="item-subtext">${dueText} (${item.dueDate})</div>
+        </div>
+        <div class="item-amount-group">
+          <div class="item-amount">${fmt(item.amount)} <span style="font-size: 0.75rem; font-weight: normal; color: var(--text-dim);">/${item.frequency.slice(0,2)}</span></div>
+          <div class="item-normalized">${fmt(weekly)}/wk · ${fmt(yearly)}/yr</div>
+          ${!isDashboard ? `<button class="btn-danger" style="margin-top: 6px;" onclick="deleteItem('${item.id}')">Delete</button>` : ''}
+        </div>
+      `;
+      return li;
+    }
+
+    // HTML escape utility
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    // Add Item Form Submit
+    document.getElementById('item-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const newItem = {
+        id: Date.now().toString(),
+        name: document.getElementById('name').value,
+        category: document.getElementById('category').value,
+        amount: parseFloat(document.getElementById('amount').value),
+        frequency: document.getElementById('frequency').value,
+        dueDate: document.getElementById('dueDate').value
+      };
+
+      items.push(newItem);
+      saveItems();
+
+      // Reset Form & Redirect to All Items View
+      document.getElementById('item-form').reset();
+      switchTab('items');
+    });
+
+    // Initial load date default (today)
+    document.getElementById('dueDate').valueToDate = new Date();
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>
